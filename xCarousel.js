@@ -219,6 +219,8 @@ class xCarousel {
   theta = null;
   radius = null;
   currentIndex = 0;
+  autoSlide = null; // interval time
+  autoSlideInterval = null; // interval reference for clearInterval()
 
   onMoveRight = null; //cb
   onMoveLeft = null; //cb
@@ -228,10 +230,14 @@ class xCarousel {
     this.items = options.items;
     this.cellSize = options.cellSize || 400;
     this.list = new DoublyLinkedList();
+    this.autoSlide = options.autoSlide;
+    this.pauseOnHover = options.pauseOnHover || true;
 
     this.onInit = options.onInit || noop;
     this.onMoveRight = options.onMoveRight || noop;
     this.onMoveLeft = options.onMoveLeft || noop;
+
+    this.mouseIn = false;
 
     this.init();
   }
@@ -274,16 +280,26 @@ class xCarousel {
 
     const rightHandler = document.createElement("div");
     rightHandler.classList.add("xRightHandler");
-
     rightHandler.addEventListener("click", this.moveRight.bind(this));
-
     scene.appendChild(rightHandler);
+
+    if(this.pauseOnHover) {
+      scene.addEventListener('mouseenter',  () => {
+          this.mouseIn = true;
+          this.stopAutoSlide(false);
+      });
+      scene.addEventListener('mouseleave', () => {
+        this.mouseIn = false;
+        this.autoSlideInit();
+      });
+    }
 
     this.elementToMount.appendChild(scene);
 
     this.changeCarousel();
 
     this.onInit(this);
+    this.autoSlideInit();
   }
 
   changeCarousel() {
@@ -318,6 +334,7 @@ class xCarousel {
     this.rotateCarousel();
 
     this.onMoveRight(this.currentNode);
+    this.stopAutoSlide(true);
   }
 
   moveLeft() {
@@ -326,6 +343,27 @@ class xCarousel {
     this.rotateCarousel();
 
     this.onMoveRight(this.currentNode);
+    this.stopAutoSlide(true);
+  }
+
+  stopAutoSlide(reset = false) {
+    if(!!this.autoSlideInterval) {
+      clearInterval(this.autoSlideInterval);
+    }
+
+    return reset && !this.mouseIn ? this.autoSlideInit() : () => {};
+  }
+
+  autoSlideInit() {
+    if(
+        this.autoSlide && 
+        typeof this.autoSlide === 'number' && 
+        this.autoSlide > 0
+      ) {
+        this.autoSlideInterval = setInterval(
+          this.moveRight.bind(this), this.autoSlide
+        )
+    }
   }
 
   get actualIndex() {
