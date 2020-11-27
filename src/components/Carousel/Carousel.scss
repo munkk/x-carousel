@@ -1,0 +1,43 @@
+.x {
+  &-scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    perspective: 1000px;
+
+    &-lcontrol {
+      position: absolute;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      left: -100%;
+    }
+
+    &-rcontrol {
+      position: absolute;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      right: -100%;
+    }
+  }
+
+  &-carousel {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0s;
+
+    &__slide {
+      position: absolute;
+      border: 1px solid black;
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
